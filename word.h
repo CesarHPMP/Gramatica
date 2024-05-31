@@ -17,7 +17,7 @@ void process_word(Node *root, gramatica gram, char *word)
 { 
     // for reference process_word(palavra, gram, word, strlen(word))
     // Rework the whole function.
-    int i = 0, j = 0;
+    int i = 0, j = 0, n = 0;
     char **matches = (char **)malloc(100 * sizeof(char **));
    
     if(*word == '\0' || word == NULL)
@@ -88,12 +88,12 @@ void process_word(Node *root, gramatica gram, char *word)
         for(j = 0; matches[i][j] != ';'; j++)
         {
             root->token = (char *)malloc(sizeof(char));
-            *root->token = matches[i][j];
-            root->token++;
-            printf("\nroot token is %c and match value is %c\n", *root->token, matches[i][j]);
-            printf("\n%c MATCH SET FOR ROOT->TOKEN %p\n", matches[i][j], root->token);
-            printf("\nJ TEM O VALOR DE %i\n", j);
+            root->token[n] = matches[i][j];
+            printf("\nroot token is %c and match value is %c\n", root->token[n], matches[i][j]);
+            n++;
         }
+        root->token[n] = '\0';
+        n = 0;
         i++;
     }
 
