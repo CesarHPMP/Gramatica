@@ -10,27 +10,22 @@
 
 char ** find_rule(char *, char , const int );
 void process_word(Node *, gramatica , char *);
-int check_word(char *, Node *, char *, gramatica);
+int check_word(char *, Node *, char *, gramatica, size_t);
 int check_word_default(char *, Node *, gramatica);
 
 void process_word(Node *root, gramatica gram, char *word)
 { 
-    // for reference process_word(palavra, gram, word, strlen(word))
-    // Rework the whole function.
-    int i = 0, j = 0, n = 0;
-    char **matches = (char **)malloc(100 * sizeof(char **));
-   
-    if(*word == '\0' || word == NULL)
+    if (word == NULL || *word == '\0')
         return;
 
     if (root == NULL)
     {
         root = (Node *)malloc(sizeof(Node));
-    }
-
-    if (root == NULL)
-    {
-        return;
+        if (root == NULL)
+        {
+            fprintf(stderr, "Memory allocation failed for root node.\n");
+            return;
+        }
     }
 
     if (root->token != NULL)
@@ -38,102 +33,91 @@ void process_word(Node *root, gramatica gram, char *word)
         goto end;
     }
 
-    matches = find_rule(gram.P, *word, 0);
-    
-    i = 0;
-    j = 0;
-
-    while(matches[i] != NULL)
+    char **matches = find_rule(gram.P, *word, 0);
+    if (matches == NULL)
     {
-        printf("\nMATCH %c COM ", *word);
-        for(int n = 0; matches[i][n] != ';'; n++)
-            printf("%c", matches[i][n]);
-        i++;
-        j++;
-    }
-
-    printf("\nLoaded Char is %c\n", matches[0][0]);
-    
-    root->token = (char *)malloc(sizeof(*matches));
-    
-    if (root->token == NULL)
-    {
+        fprintf(stderr, "Failed to find rules.\n");
         return;
     }
 
-    i = 0;
-    j = 0;
-
+    int i = 0;
     while (matches[i] != NULL)
     {
-        printf("\nIN LOOP FOR ROOT->TOKEN\n");
+        printf("\nMATCH %c COM ", *word);
+        for (int n = 0; matches[i][n] != ';'; n++)
+            printf("%c", matches[i][n]);
+        i++;
+    }
+
+    printf("\nLoaded Char is %c\n", matches[0][0]);
+
+    root->token = (char *)malloc(strlen(matches[0]) + 1);
+    if (root->token == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for root token.\n");
+        free(matches);
+        return;
+    }
+
+    strcpy(root->token, matches[0]);
+    printf("Added token to root: %s\n", root->token); // Debug print
+
+    i = 0;
+    while (matches[i] != NULL)
+    {
         if (!test_rule_product(matches[i], word, gram))
         {
             matches[i] = NULL;
-            i+=1;
+            i++;
             continue;
-        } 
-        printf("\nIN LOOP TO FEED TOKENS.\n");
-        for(int n = 0; matches[i][n] != ';'; n++)
-        {
-            if(matches[i] == NULL)
-            {
-                printf("\nMATCH DOES NOT EXIST!!!!!!!!");
-                continue;
-            }
-            printf("%c", matches[i][n]);
         }
 
-    
-        for(j = 0; matches[i][j] != ';'; j++)
+        for (int j = 0; matches[i][j] != ';'; j++)
         {
-            root->token = (char *)malloc(sizeof(char));
-            root->token[n] = matches[i][j];
-            printf("\nroot token is %c and match value is %c\n", root->token[n], matches[i][j]);
-            n++;
+            root->token[j] = matches[i][j];
         }
-        root->token[n] = '\0';
-        n = 0;
+        root->token[strlen(matches[i])] = '\0';
         i++;
     }
 
     if (root->token != NULL)
     {
         printf("\nSUCCESSFUL PROCESS FOR %s", root->token);
-    } else
+    }
+    else
     {
         printf("\nROOT TOKEN NULL\n");
+        free(matches);
         return;
     }
-    printf("\nIN CHECK WORD\n");
 
-    switch(check_word_default(word, root, gram))
+    switch (check_word_default(word, root, gram))
     {
         case 1:
             printf("\nSUCCESSFUL WORD CREATION\n");
-            return;
-
+            break;
         case 0:
             printf("\nWORD GONE WRONG");
-            return;
-
+            break;
         default:
             printf("\nWord is incomplete\n");
     }
 
 end:
-
     word++;
     if (root->esq == NULL)
     {
         printf("\nGOING LEFT\n");
-        return process_word(root->esq, gram, word);
+        process_word(root->esq, gram, word);
     }
-    
-    printf("\nGOING RIGHT\n");
-    return process_word(root->dir, gram, word);
-}
+    else
+    {
+        printf("\nGOING RIGHT\n");
+        process_word(root->dir, gram, word);
+    }
 
+    free(matches);
+}
 
 char ** find_rule(char *rules, char var, const int n)
 {// 1 to find rule and 0 to find product
@@ -194,17 +178,16 @@ char ** find_rule(char *rules, char var, const int n)
 
 int check_word_default(char *word, Node *tree, gramatica gram)
 {
-    char *new_word = "\0"; // Default new_word
-    
-    return check_word(word, tree, new_word, gram); // Call the overloaded function
-}
+    char *new_word = (char *)malloc(sizeof(word));
+    size_t len = 0;
+    return check_word(word, tree, new_word, gram, len); // Call the overloaded function
+} 
 
-int check_word(char *word, Node *tree, char *new_word, gramatica gram)
+int check_word(char *word, Node *tree, char *new_word, gramatica gram, size_t len)
 {
     // Declare variables
     int i;
     char current_char;
-    int len = 0;
 
     // Check if the tree is NULL
     if (tree == NULL)
@@ -220,12 +203,13 @@ int check_word(char *word, Node *tree, char *new_word, gramatica gram)
             printf("\nINSIDE TREE TOKEN LOOP\n");
             current_char = tree->token[i];
             // Check if the current character is not a variable
-            if (!testvar(gram, current_char, 2))
+            int holder = testvar(gram, current_char, 2);
+            if (holder == 0)
             {
                 // Append the current character to the new word
-                len = strlen(new_word);
                 new_word[len] = current_char;
                 new_word[len + 1] = '\0'; // Null-terminate the string
+                len++;
             }
             i++;
         }
@@ -260,7 +244,7 @@ int check_word(char *word, Node *tree, char *new_word, gramatica gram)
     // Continue traversal to the left and right subtrees
     if (tree->esq)
     {
-        if(check_word(word, tree->esq, new_word, gram) == 0)
+        if(check_word(word, tree->esq, new_word, gram, len) == 0)
             return 0;
         else
             return 1;
@@ -268,7 +252,7 @@ int check_word(char *word, Node *tree, char *new_word, gramatica gram)
 
     if (tree->dir)
     {
-        if(check_word(word, tree->dir, new_word, gram) == 0)
+        if(check_word(word, tree->dir, new_word, gram, len) == 0)
             return 0;
         else
             return 1;

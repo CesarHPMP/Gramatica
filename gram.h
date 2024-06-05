@@ -18,7 +18,7 @@ typedef struct Node {
 int testvar(gramatica gram, char c, size_t opt)// 1 for N rules, 2 for alphabet, 3 for both
 {
     if(c == ':')
-        return 0;
+        return -1;
     
     int j = 0, i = 0, d = 0;
     if(opt == 1 || opt == 3)
@@ -100,9 +100,7 @@ void print_tree(Node *root)
     if (root->token == NULL) {
         printf("Token: (null)\n");
     } else {
-        printf("\nToken: "); 
-        for(int i = 0; root->token[i] != '\0'; i++)
-            printf("%c", root->token[i]); // Print the current node's token
+        printf("\nToken: %s\n", root->token); // Debug print
     }
 
     if(root->esq != NULL)
@@ -117,7 +115,6 @@ void print_tree(Node *root)
     }
     return;
 }
-
 void free_tree(Node *root) {
     int n = 0;
 

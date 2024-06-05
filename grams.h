@@ -59,8 +59,9 @@ int gram_set(gramatica *gram)
         i = 0;
         while (buffer[i] != '\n' && buffer[i] != '\0') 
         {
-            if (testvar(*gram, buffer[i], 3)) {
-                exit(testvar(*gram, buffer[i], 3));
+            int holder = testvar(*gram, buffer[i], 3);
+            if (holder == 1) {
+                EXIT_FAILURE;
             }
             i++;
         }
