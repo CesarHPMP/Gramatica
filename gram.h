@@ -64,7 +64,8 @@ bool test_rule_product(char *rule, char *word, gramatica gram)
     // Loop through the rule to copy products into buff
     for (i = 0; *rule != ';' && *rule != '\0'; rule++) 
     {
-        if (!testvar(gram, *rule, 1))
+        int holder = testvar(gram, *rule, 1);
+        if (holder == 1)
         {
             printf("\n%c IS NOT FROM ALPHABET\n", *rule);
             continue; // Skip recording characters that fail the testvar check
