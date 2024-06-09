@@ -28,7 +28,8 @@ int gram_set(gramatica *gram)
 
     // Allocate memory for S
     gram->S = (char *)malloc(2 * sizeof(char)); // Allocate memory for S
-    if (gram->S == NULL) {
+    if (gram->S == NULL) 
+    {
         printf("Memory allocation failed for S.\n");
         return -1;
     }
@@ -41,7 +42,8 @@ int gram_set(gramatica *gram)
 
     // Allocate memory for P
     gram->P = (char *)malloc(capacity * sizeof(char)); // Allocate memory for P
-    if (gram->P == NULL) {
+    if (gram->P == NULL) 
+    {
         printf("Memory allocation failed for P.\n");
         return -1;
     }
@@ -60,12 +62,14 @@ int gram_set(gramatica *gram)
         while (buffer[i] != '\n' && buffer[i] != '\0') 
         {
             int holder = testvar(*gram, buffer[i], 3);
-            if (holder == 1) {
+            if (holder == 1) 
+            {
                 EXIT_FAILURE;
             }
             i++;
         }
-        if (buffer[i] == '\0') {
+        if (buffer[i] == '\0') 
+        {
             printf("Missing newline character in input.\n");
             return -1;
         }
@@ -124,30 +128,33 @@ void gram_feed(Node *root, char *production_rule) {
     printf("\nNew node token-> %s", new_node->token);
 
     // Move to the end of the production rule
-    while (*production_rule != ';' && *production_rule != '\0') {
+    while (*production_rule != ';' && *production_rule != '\0') 
         production_rule++;
-    }
+    
 
     // Check for end of string
-    if (*production_rule == '\0') {
-        // If there are no more production rules, exit the function
+    if (*production_rule == '\0') // If there are no more production rules, exit the function
         return;
-    }
+    
 
     // Null-terminate the production rule and move to the next rule
     *production_rule = '\0';
     production_rule++;
 
     // Append the new node to the root of the parse tree
-    if (root->esq == NULL) {
+    if (root->esq == NULL) 
+    {
         printf("\ngoing left");
         root->esq = new_node;
         gram_feed(root, production_rule);
-    } else if (root->dir == NULL) {
-        printf("\ngoing right");
-        root->dir = new_node;
-        gram_feed(new_node, production_rule);
-    } else {
+    } else 
+        if (root->dir == NULL) 
+        {
+            printf("\ngoing right");
+            root->dir = new_node;
+            gram_feed(new_node, production_rule);
+        } else 
+        {
         printf("Error: Both esq and dir nodes are occupied.\n");
         free(new_node->token); // Free the token memory
         free(new_node); // Free the new node memory

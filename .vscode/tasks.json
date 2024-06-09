@@ -7,7 +7,7 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "gramatica.c",
+                "${workspaceFolder}/gramatica.c",
                 "-o",
                 "${workspaceFolder}/gramatica"
             ],
