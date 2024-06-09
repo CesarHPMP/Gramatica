@@ -1,8 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #ifndef GRAM_H__
 #define GRAM_H__
 #include "gram.h"
