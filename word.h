@@ -33,6 +33,7 @@ void process_word(Node *root, gramatica gram, char *word)
     
 
     char **matches = find_rule(gram.P, *word, 0);
+
     if (matches == NULL) 
     {
         fprintf(stderr, "Failed to find rules.\n");
@@ -75,8 +76,6 @@ void process_word(Node *root, gramatica gram, char *word)
         i++;
     }
 
-    printf("Added token to root: %s\n", root->token); // Debug print
-
     if (root->token != NULL) 
     {
         printf("\nSUCCESSFUL PROCESS FOR %s", root->token);
@@ -99,8 +98,9 @@ void process_word(Node *root, gramatica gram, char *word)
             printf("\nWord is incomplete\n");
     }
 
-end:
     word++;
+
+end:
     if (root->esq == NULL) 
     {
         printf("\nGOING LEFT\n");

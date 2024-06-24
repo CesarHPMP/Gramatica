@@ -20,8 +20,8 @@ typedef struct Node
 
 int testvar(gramatica , char , size_t ); 
 bool test_rule_product(char *, char *, gramatica );
-int check_word(char *, Node *, char *, gramatica, size_t);
-int check_word_default(char *, Node *, gramatica);
+int check_word(char *, Node *, char *, gramatica );
+int check_word_default(char *, Node *, gramatica );
 
 int testvar(gramatica gram, char c, size_t opt) 
 {
@@ -158,71 +158,69 @@ int check_word_default(char *word, Node *tree, gramatica gram)
         fprintf(stderr, "Memory allocation failed for new_word.\n");
         return 0;
     }
-    return check_word(word, tree, new_word, gram, 0); // Call the overloaded function
+
+    new_word[0] = '\0'; 
+    return check_word(word, tree, new_word, gram); // Call the overloaded function
 }
 
 // Recursively check if the word matches the grammar using the tree
-int check_word(char *word, Node *tree, char *new_word, gramatica gram, size_t len)
+int check_word(char *word, Node *tree, char *new_word, gramatica gram)
 {
     if (tree == NULL)
         return 0;
 
-    if (tree->token != NULL) 
-    {
-        int i = 0;
-        while (tree->token[i] != '\0') 
-        {
-            printf("\nINSIDE TREE TOKEN LOOP\n");
-            char current_char = tree->token[i];
-            int holder = testvar(gram, current_char, 2);
-            if (holder == 0) 
-            {
-                new_word[len] = current_char;
-                new_word[len + 1] = '\0'; // Null-terminate the string
-                len++;
-            }
-            i++;
-        }
-    }else 
-    {
+    if (tree->token == NULL) 
         return 0;
+    
+    int i = 0;
+    size_t len = 0;
+
+    do
+    {
+        printf("\n--> WORD CHAR IS %c <--\n", new_word[len]);
+        len++;
+    }while(new_word[len] != '\0');
+
+    len++;
+
+    printf("\nCurrent word len is %li\n", len);
+
+    while (tree->token[i] != '\0') 
+    {
+        char current_char = tree->token[i];
+        int holder = testvar(gram, current_char, 2);
+        if (holder == 0) 
+        {
+            printf("\nAdding %c to new_word\n", current_char);
+            new_word[len++] = current_char;
+            new_word[len] = '\0'; // Null-terminate the string
+        }
+        i++;
     }
 
-    if (strcmp(new_word, word) == 0) 
+    printf("\nWord thus far: %s\n", new_word);
+
+    if(tree->esq)
     {
-        printf("Success: The new %s word matches the original word.\n", new_word);
-        return 1;
-    }else 
+        return check_word(word, tree->esq, new_word, gram);
+    }
+
+    if(tree->dir)
     {
-        if (strlen(new_word) < strlen(word)) 
+        return check_word(word, tree->dir, new_word, gram);
+    }
+    
+    //reworking string comp
+    for(i = 0; new_word[i] != '\0'; i++)
+    {
+        if(new_word[i] != word[i])
         {
-            if (tree->esq == NULL && tree->dir == NULL) 
-            {
-                printf("Partial Success: The new word is shorter than the original word.\n");
-                return 1;
-            }
-        }else 
-        {
-            printf("Failure: The new word: %s does not match the original word.\n", new_word);
-            EXIT_FAILURE;
+            printf("\nNEW_WORD %s IS DIFFERENT FROM WORD %s", new_word, word);
+            return 0;
         }
     }
+    if(strlen(new_word) < strlen(word))
+        return 2;
 
-    if (tree->esq) 
-    {
-        if (check_word(word, tree->esq, new_word, gram, len) == 0)
-            return 0;
-        else
-            return 1;
-    }
-
-    if (tree->dir) 
-    {
-        if (check_word(word, tree->dir, new_word, gram, len) == 0)
-            return 0;
-        else
-            return 1;
-    }
-
-    return 0;
+    return 1;
 }
